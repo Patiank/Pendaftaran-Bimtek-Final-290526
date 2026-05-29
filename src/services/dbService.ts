@@ -321,7 +321,8 @@ export const dbService = {
         return resilientOnSnapshot(colRef, (colSnap) => {
           const data: Registration[] = [];
           colSnap.forEach((docSnap) => {
-            data.push(docSnap.data() as Registration);
+            const item = docSnap.data() as Registration;
+            data.push({ ...item, id: docSnap.id });
           });
           const sorted = data.sort((a, b) => new Date(b.registeredAt).getTime() - new Date(a.registeredAt).getTime());
           
@@ -354,7 +355,8 @@ export const dbService = {
         return resilientOnSnapshot(colRef, (colSnap) => {
           const data: Attendance[] = [];
           colSnap.forEach((docSnap) => {
-            data.push(docSnap.data() as Attendance);
+            const item = docSnap.data() as Attendance;
+            data.push({ ...item, id: docSnap.id });
           });
           const sorted = data.sort((a, b) => new Date(b.attendedAt).getTime() - new Date(a.attendedAt).getTime());
           
@@ -521,7 +523,8 @@ export const dbService = {
         const colSnap = await getDocs(collection(db, "registrations"));
         const data: Registration[] = [];
         colSnap.forEach((docSnap) => {
-          data.push(docSnap.data() as Registration);
+          const item = docSnap.data() as Registration;
+          data.push({ ...item, id: docSnap.id });
         });
         // Sort newest first
         return data.sort((a, b) => new Date(b.registeredAt).getTime() - new Date(a.registeredAt).getTime());
@@ -595,7 +598,8 @@ export const dbService = {
         const colSnap = await getDocs(collection(db, "attendance"));
         const data: Attendance[] = [];
         colSnap.forEach((docSnap) => {
-          data.push(docSnap.data() as Attendance);
+          const item = docSnap.data() as Attendance;
+          data.push({ ...item, id: docSnap.id });
         });
         return data.sort((a, b) => new Date(b.attendedAt).getTime() - new Date(a.attendedAt).getTime());
       } catch (error) {

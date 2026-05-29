@@ -172,20 +172,22 @@ app.post("/api/scan-ktp", async (req, res) => {
       }
     }
 
-    // If we exhausted all tries and encountered a 503 or overload error, activate fallback instead of failing
+    // If we exhausted all tries and encountered a 503 or overload error, return a busy/network error
     const errorStr = lastError?.message || String(lastError);
     if (errorStr.includes("503") || errorStr.includes("demand") || errorStr.includes("UNAVAILABLE") || errorStr.includes("overloaded") || errorStr.includes("quota")) {
-      console.warn("⚠️ Gemini API overloaded or quota model unavailable, serving grace-filled Sumatera Barat fallback record.");
-      return res.json(getRandomFallback());
+      console.warn("⚠️ Gemini API overloaded or quota model unavailable.");
+      return res.status(503).json({
+        error: "Server pendeteksi KTP otomatis sedang sibuk (Overloaded) atau terjadi gangguan jaringan. Silakan ketik atau isi formulir pendaftaran secara manual di bawah ini!"
+      });
     }
 
     // Re-throw if it was some other critical validation error
     throw lastError;
   } catch (error: any) {
     console.error("OCR scanning error:", error);
-    // Even on general final catch, let's gracefully fall back to mock data so registration never hard-crashes!
-    console.log("Serving ultimate fallback due to exception.");
-    return res.json(getRandomFallback());
+    return res.status(400).json({
+      error: "Data KTP tidak dapat dideteksi secara otomatis karena gambar buram, kurang pencahayaan, atau terjadi gangguan jaringan. Silakan ketik atau isi formulir secara manual!"
+    });
   }
 });
 

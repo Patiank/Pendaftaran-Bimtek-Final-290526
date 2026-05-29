@@ -3080,13 +3080,13 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                         // Completely hide the "default" sample session as the user wants to input themselves
                         return ev.id !== "default";
                       })
-                      .map((ev) => {
+                      .map((ev, idx) => {
                         const isActive = 
                           (settings.originalEventId && ev.id === settings.originalEventId) ||
                           (!settings.originalEventId && ev.eventTitle === settings.eventTitle);
                         return (
                         <div
-                          key={ev.id}
+                          key={`ev-item-${ev.id || 'no-id'}-${idx}`}
                           className={`p-4 rounded-2xl border transition-all flex flex-col justify-between ${
                             isActive
                               ? "bg-emerald-950/20 border-emerald-500/60 shadow-lg shadow-emerald-500/5 text-slate-100"
