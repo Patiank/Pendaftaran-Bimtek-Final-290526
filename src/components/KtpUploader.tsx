@@ -12,6 +12,8 @@ interface KtpUploaderProps {
     ktpBase64: string;
     gender?: string;
     isSelfie?: boolean;
+    isFallback?: boolean;
+    message?: string;
   }) => void;
   onError: (msg: string) => void;
 }
@@ -196,6 +198,8 @@ export const KtpUploader: React.FC<KtpUploaderProps> = ({ onScanComplete, onErro
             gender: data.gender || "Laki-laki",
             ktpBase64: compressedBase64,
             isSelfie: false,
+            isFallback: data.isFallback,
+            message: data.message,
           });
         }
       } catch (err: any) {

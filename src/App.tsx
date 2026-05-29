@@ -324,6 +324,8 @@ export default function App() {
     ktpBase64: string;
     isSelfie?: boolean;
     gender?: string;
+    isFallback?: boolean;
+    message?: string;
   }) => {
     if (data.isSelfie) {
       setIsSelfieMode(true);
@@ -343,11 +345,16 @@ export default function App() {
         setFormGender(data.gender);
       }
       setGlobalError("");
-      setGlobalSuccess("Data KTP berhasil diekstraksi ke formulir secara otomatis!");
+      
+      if (data.isFallback) {
+        setGlobalSuccess(data.message || "Server AI sedang sibuk (Overloaded). Kami telah mengisi data contoh berkualitas secara otomatis agar pendaftaran Anda tetap berjalan!");
+      } else {
+        setGlobalSuccess("Data KTP berhasil diekstraksi ke formulir secara otomatis!");
+      }
     }
     setTimeout(() => {
       setGlobalSuccess("");
-    }, 5000);
+    }, data.isFallback ? 10000 : 5000);
   };
 
   const handleManualRegisterSubmit = async (e: React.FormEvent) => {

@@ -457,6 +457,76 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     settings.isCertQrEnabled
   ]);
 
+  const downloadRegistrantsCSV = () => {
+    const sorted = [...registrations].sort((a, b) => new Date(a.registeredAt).getTime() - new Date(b.registeredAt).getTime());
+    const headers = ["No", "ID Pendaftaran", "Tanggal Daftar", "NIK", "Nama Lengkap", "Kabupaten/Kota", "Jenis Kelamin", "No. HP", "Instansi", "Jabatan", "Alamat Lengkap", "Warna Kartu"];
+    const rows = sorted.map((reg, index) => {
+      const escapeCsv = (str: any) => {
+        if (str === undefined || str === null) return '""';
+        return `"${String(str).replace(/"/g, '""')}"`;
+      };
+      const pDate = reg.registeredAt ? new Date(reg.registeredAt).toLocaleString("id-ID") : "-";
+      return [
+        index + 1,
+        escapeCsv(reg.id),
+        escapeCsv(pDate),
+        `"'\t${reg.nik}"`,
+        escapeCsv(reg.name),
+        escapeCsv(reg.kabKota),
+        escapeCsv(reg.gender),
+        escapeCsv(reg.whatsapp),
+        escapeCsv(reg.instansi || ""),
+        escapeCsv(reg.jabatan || ""),
+        escapeCsv(reg.address),
+        escapeCsv(reg.color),
+      ];
+    });
+    const csvContent = "\uFEFF" + [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    const sanitizedTitle = settings.eventTitle.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+    link.setAttribute("download", `pendaftar_${sanitizedTitle}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const downloadAttendanceCSV = () => {
+    const sorted = [...attendance].sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+    const headers = ["No", "ID Absensi", "ID Pendaftaran", "Tanggal Absen", "Hari Ke", "NIK", "Nama Peserta", "No. HP", "Kabupaten/Kota", "Status Tanda Tangan"];
+    const rows = sorted.map((att, index) => {
+      const escapeCsv = (str: any) => {
+        if (str === undefined || str === null) return '""';
+        return `"${String(str).replace(/"/g, '""')}"`;
+      };
+      const pDate = att.timestamp ? new Date(att.timestamp).toLocaleString("id-ID") : "-";
+      return [
+        index + 1,
+        escapeCsv(att.id),
+        escapeCsv(att.registrationId),
+        escapeCsv(pDate),
+        att.dayNumber,
+        `"'\t${att.nik}"`,
+        escapeCsv(att.participantName),
+        escapeCsv(att.whatsapp || ""),
+        escapeCsv(att.kabKota || ""),
+        escapeCsv(att.signature ? "Ada Tanda Tangan" : "Tidak Ada"),
+      ];
+    });
+    const csvContent = "\uFEFF" + [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    const sanitizedTitle = settings.eventTitle.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+    link.setAttribute("download", `kehadiran_${sanitizedTitle}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const handleActivateEvent = async (event: AppSettings) => {
     try {
       setEventActionStatus("Sedang mengaktifkan event...");
@@ -1770,6 +1840,14 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
                   <div className="flex shrink-0 items-center space-x-2">
                     <button
+                      onClick={downloadRegistrantsCSV}
+                      className="px-4 py-2.5 bg-slate-700 hover:bg-slate-600 text-white text-xs font-black rounded-xl transition-all shadow-md flex items-center space-x-1.5 active:scale-95 cursor-pointer"
+                      title="Unduh seluruh data pendaftar dalam file CSV / Excel"
+                    >
+                      <Download className="w-4 h-4 text-emerald-400" />
+                      <span>Unduh CSV / Excel</span>
+                    </button>
+                    <button
                       onClick={() => triggerPrintReport("registrants")}
                       className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black rounded-xl transition-all shadow-md flex items-center space-x-1.5 active:scale-95 cursor-pointer"
                     >
@@ -1925,6 +2003,14 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                   </div>
 
                   <div className="flex shrink-0 items-center space-x-2">
+                    <button
+                      onClick={downloadAttendanceCSV}
+                      className="px-4 py-2.5 bg-slate-700 hover:bg-slate-600 text-white text-xs font-black rounded-xl transition-all shadow-md flex items-center space-x-1.5 active:scale-95 cursor-pointer"
+                      title="Unduh seluruh data absensi dalam file CSV / Excel"
+                    >
+                      <Download className="w-4 h-4 text-teal-400" />
+                      <span>Unduh CSV / Excel</span>
+                    </button>
                     <button
                       onClick={() => triggerPrintReport("attendance")}
                       className="px-4 py-2.5 bg-teal-600 hover:bg-teal-500 text-white text-xs font-black rounded-xl transition-all shadow-md flex items-center space-x-1.5 active:scale-95 cursor-pointer"
